@@ -107,8 +107,9 @@ namespace WhatIsWorth {
 			List<Guest> sampledGuests,
 			Func<Person, float> calculateValue
 		) {
-			var values = new List<float>();
+			var values = new List<float>(sampledGuests.Count);
 			var bucketCounts = new Dictionary<float, int>();
+			float sum = 0f;
 
 			foreach (Guest guest in sampledGuests) {
 				float value = roundValue(calculateValue(guest));
@@ -117,10 +118,9 @@ namespace WhatIsWorth {
 				}
 
 				values.Add(value);
-				if (!bucketCounts.ContainsKey(value)) {
-					bucketCounts[value] = 0;
-				}
-				bucketCounts[value]++;
+				sum += value;
+				bucketCounts.TryGetValue(value, out int count);
+				bucketCounts[value] = count + 1;
 			}
 
 			if (values.Count == 0) {
@@ -128,11 +128,10 @@ namespace WhatIsWorth {
 			}
 
 			values.Sort();
-			float average = values.Sum() / values.Count;
+			float average = sum / values.Count;
 			float median = calculateMedian(values);
 			var buckets = bucketCounts
-				.Select(pair => new MarketResearchValueEstimateBucket(pair.Key, pair.Value))
-				.ToList();
+				.Select(pair => new MarketResearchValueEstimateBucket(pair.Key, pair.Value));
 
 			return new MarketResearchValueEstimateRow(
 				targetType,

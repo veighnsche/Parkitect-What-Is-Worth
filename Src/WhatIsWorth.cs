@@ -32,6 +32,7 @@ namespace WhatIsWorth {
         public override void onEnabled() {
             Instance = this;
             Debug.LogWarning("[WhatIsWorth] Loading!");
+            MarketResearchValueEstimateCache.clear();
 
             _modPath = ModManager.Instance.getMod(this.getIdentifier()).path;
             _settingsFilePath = System.IO.Path.Combine(_modPath, "WhatIsWorth.json");
@@ -45,6 +46,7 @@ namespace WhatIsWorth {
 		}
 
         public override void onDisabled() {
+            MarketResearchValueEstimateCache.clear();
             _harmony?.UnpatchAll(getIdentifier());
 		}
 

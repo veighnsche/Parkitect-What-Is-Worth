@@ -352,7 +352,7 @@
   <ItemGroup>
     <Compile Include="Src\MarketResearchValueEstimateAggregator.cs" />
     <Compile Include="Src\MarketResearchValueEstimateResult.cs" />
-    <Compile Include="Src\WhatIsWorthPatch_Attraction.cs" />
+    <Compile Include="Src\WhatIsWorthPatch_MarketResearchCampaign.cs" />
     <Compile Include="Src\WhatIsWorthConfig.cs" />
     <Compile Include="Src\WhatIsWorth.cs" />
   </ItemGroup>

@@ -350,6 +350,7 @@
     <Content Include="Res\ui_icon_rotationGizmoDisabled.png" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Src\MarketResearchValueEstimateResult.cs" />
     <Compile Include="Src\WhatIsWorthPatch_Attraction.cs" />
     <Compile Include="Src\WhatIsWorthConfig.cs" />
     <Compile Include="Src\WhatIsWorth.cs" />

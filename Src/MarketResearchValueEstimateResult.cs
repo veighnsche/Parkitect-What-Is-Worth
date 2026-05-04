@@ -28,8 +28,8 @@ namespace WhatIsWorth {
 		public float maxValue;
 		public float averageValue;
 		public float medianValue;
-		public float pricingGap;
-		public List<MarketResearchValueEstimateBucket> buckets = new List<MarketResearchValueEstimateBucket>();
+		public float pricingGap => Math.Abs(currentPrice - averageValue);
+		public List<MarketResearchValueEstimateBucket> buckets;
 
 		public MarketResearchValueEstimateRow(
 			MarketResearchValueEstimateTargetType targetType,
@@ -52,11 +52,11 @@ namespace WhatIsWorth {
 			this.maxValue = maxValue;
 			this.averageValue = averageValue;
 			this.medianValue = medianValue;
-			this.pricingGap = Math.Abs(currentPrice - averageValue);
-			this.buckets = buckets.OrderBy(bucket => bucket.value).ToList();
+			this.buckets = (buckets ?? Enumerable.Empty<MarketResearchValueEstimateBucket>()).OrderBy(bucket => bucket.value).ToList();
 		}
 
 		public List<MarketResearchValueEstimateBucket> getDisplayBuckets(int maxBucketCount, int maxBucketsBeforeTruncation) {
+			maxBucketCount = Math.Min(maxBucketCount, maxBucketsBeforeTruncation);
 			if (buckets.Count <= maxBucketsBeforeTruncation) {
 				return new List<MarketResearchValueEstimateBucket>(buckets);
 			}
@@ -96,7 +96,7 @@ namespace WhatIsWorth {
 		}
 
 		private static List<MarketResearchValueEstimateRow> getRowsForDisplay(IEnumerable<MarketResearchValueEstimateRow> rows) {
-			return rows
+			return (rows ?? Enumerable.Empty<MarketResearchValueEstimateRow>())
 				.OrderByDescending(row => row.pricingGap)
 				.ThenBy(row => row.displayName)
 				.Take(DISPLAY_ROW_LIMIT)
@@ -105,18 +105,29 @@ namespace WhatIsWorth {
 	}
 
 	public static class MarketResearchValueEstimateCache {
+		private static readonly object lockObject = new object();
 		private static readonly Dictionary<int, MarketResearchValueEstimateResult> resultsByResearchTime = new Dictionary<int, MarketResearchValueEstimateResult>();
 
 		public static void store(MarketResearchValueEstimateResult result) {
-			resultsByResearchTime[result.researchedAt] = result;
+			if (result == null) {
+				return;
+			}
+
+			lock (lockObject) {
+				resultsByResearchTime[result.researchedAt] = result;
+			}
 		}
 
 		public static bool tryGet(int researchedAt, out MarketResearchValueEstimateResult result) {
-			return resultsByResearchTime.TryGetValue(researchedAt, out result);
+			lock (lockObject) {
+				return resultsByResearchTime.TryGetValue(researchedAt, out result);
+			}
 		}
 
 		public static void clear() {
-			resultsByResearchTime.Clear();
+			lock (lockObject) {
+				resultsByResearchTime.Clear();
+			}
 		}
 	}
 }
